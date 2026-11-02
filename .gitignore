@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+
+# Variaveis de ambiente e segredos (OBRIGATORIO manter fora do Git)
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Expo & Builds
+.expo/
+dist/
+web-build/
+build/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro / Debug
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
