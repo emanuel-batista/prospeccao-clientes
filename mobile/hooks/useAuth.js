@@ -37,8 +37,11 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
     }
 
-    async function register(name, email, password) {
-        await api.post('/auth/register', { name, email, password });
+    async function register(name, email, password, companyName, document, avatarUri) {
+        const payload = typeof name === 'object'
+            ? name
+            : { name, email, password, companyName, document, avatarUri };
+        await api.post('/auth/register', payload);
     }
 
     async function logout() {
