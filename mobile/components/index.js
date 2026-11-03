@@ -4,3 +4,7 @@ export { default as Button } from './Button';
 export { default as AvatarPicker } from './AvatarPicker';
 export { default as BackButton } from './BackButton';
 export { default as AuthLink } from './AuthLink';
+export { default as NeumorphicView } from './NeumorphicView';
+export { default as WelcomeBar } from './WelcomeBar';
+export { default as MetricCard } from './MetricCard';
+export { default as QuickActionBar } from './QuickActionBar';
