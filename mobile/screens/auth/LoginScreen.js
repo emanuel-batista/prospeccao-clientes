@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
-import { Logo, Input, Button, AuthLink } from '../../components';
+import { AnimatedLogo, Input, Button, AuthLink } from '../../components';
 
 export default function LoginScreen({ navigation }) {
     const { login } = useAuth();
@@ -44,9 +44,9 @@ export default function LoginScreen({ navigation }) {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}>
                     
-                    {/* Seção Superior com Logotipo Vetorial */}
+                    {/* Seção Superior com Logotipo - reproduz animação 1x após 3 segundos */}
                     <View style={styles.logoSection}>
-                        <Logo size={74} color="#080A96" />
+                        <AnimatedLogo size={74} autoPlayDelay={3000} loop={false} />
                     </View>
 
                     {/* Formulário com Componentes Reutilizáveis */}
