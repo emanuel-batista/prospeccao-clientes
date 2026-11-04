@@ -7,19 +7,9 @@ if (typeof net.setDefaultAutoSelectFamily === 'function') {
   net.setDefaultAutoSelectFamily(false);
 }
 
-require('dotenv').config();
 const app = require('./app');
-const connectDatabase = require('./config/database');
-
 const PORT = process.env.PORT || 3000;
 
-async function startServer() {
-  await connectDatabase();
-
-  app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-  });
-}
-
-startServer();
-
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});

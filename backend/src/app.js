@@ -1,13 +1,18 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/database');
 
+const authRoutes = require('./routes/authRoutes');
+const clientRoutes = require('./routes/clientRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const integrationRoutes = require('./routes/integrationRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
-// Permite que o app mobile envie e receba JSON
+connectDB();
+
 app.use(cors());
 app.use(express.json());
 
@@ -16,25 +21,13 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'API Prospecção de Clientes funcionando!' });
 });
 
-// Rotas (carregadas automaticamente assim que criar os arquivos)
-try {
-  const authRoutes = require('./routes/authRoutes');
-  app.use('/auth', authRoutes);
-} catch (err) {
-  // authRoutes ainda não criado
-}
+// Rotas da Pessoa 1 (Paulo)
+app.use('/auth', authRoutes);
+app.use('/clients', clientRoutes);
 
-try {
-  const clientRoutes = require('./routes/clientRoutes');
-  app.use('/clients', clientRoutes);
-} catch (err) {
-  // clientRoutes ainda não criado
-}
-
-// Rotas (Dashboard, Integrações e IA)
+// Rotas da Pessoa 2 (Otávio)
 app.use('/dashboard', dashboardRoutes);
 app.use('/integrations', integrationRoutes);
 app.use('/ai', aiRoutes);
 
 module.exports = app;
-
