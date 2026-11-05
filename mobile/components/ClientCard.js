@@ -17,7 +17,7 @@ import {
 /**
  * Utilitário de formatação de CNPJ
  */
-function formatCnpj(raw) {
+export function formatCnpj(raw) {
     if (!raw) return 'CNPJ não informado';
     const digits = String(raw).replace(/\D/g, '');
     if (digits.length === 14) {
@@ -32,7 +32,7 @@ function formatCnpj(raw) {
 /**
  * Obter configuração semântica de status/situação
  */
-function getStatusConfig(situacao) {
+export function getStatusConfig(situacao) {
     const s = String(situacao || '').toLowerCase();
 
     if (s.includes('novo')) {
@@ -74,7 +74,7 @@ function getStatusConfig(situacao) {
 /**
  * Obter cor do potencial comercial
  */
-function getPotentialColor(potencial, score) {
+export function getPotentialColor(potencial, score) {
     const pot = String(potencial || '').toLowerCase();
     const numScore = Number(score || 0);
 

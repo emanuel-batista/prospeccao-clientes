@@ -1,4 +1,9 @@
 /**
+ * Cache em memória para consultas de CNPJ para evitar excesso de requisições e rate-limiting (HTTP 429)
+ */
+const cnpjCache = new Map();
+
+/**
  * Serviço de integração com a BrasilAPI para consulta de CNPJ
  * Documentação: https://brasilapi.com.br/docs#tag/CNPJ
  */
@@ -11,6 +16,11 @@ async function consultarCnpj(cnpjBruto) {
     const erro = new Error('CNPJ inválido. O CNPJ deve conter 14 números.');
     erro.statusCode = 400;
     throw erro;
+  }
+
+  // Se já consultado recentemente nesta sessão, devolve direto do cache
+  if (cnpjCache.has(cnpj)) {
+    return cnpjCache.get(cnpj);
   }
 
   // Cabeçalhos para evitar bloqueio do Cloudflare da BrasilAPI contra o User-Agent padrão do Node.js
@@ -41,7 +51,7 @@ async function consultarCnpj(cnpjBruto) {
     if (respFallback.ok) {
       const fb = await respFallback.json();
       if (fb && fb.status !== 'ERROR') {
-        return {
+        const resultadoFallback = {
           cnpj: (fb.cnpj || cnpj).replace(/\D/g, ''),
           razaoSocial: fb.nome || '',
           nomeFantasia: fb.fantasia || '',
@@ -57,6 +67,8 @@ async function consultarCnpj(cnpjBruto) {
           cidade: fb.municipio || '',
           estado: fb.uf || '',
         };
+        cnpjCache.set(cnpj, resultadoFallback);
+        return resultadoFallback;
       }
     }
 
@@ -68,7 +80,7 @@ async function consultarCnpj(cnpjBruto) {
   const dados = await resposta.json();
 
   // 4. Devolve apenas os dados limpos que o formulário do aplicativo usa
-  return {
+  const resultado = {
     cnpj: dados.cnpj || cnpj,
     razaoSocial: dados.razao_social || '',
     nomeFantasia: dados.nome_fantasia || '',
@@ -84,6 +96,8 @@ async function consultarCnpj(cnpjBruto) {
     cidade: dados.municipio || '',
     estado: dados.uf || '',
   };
+  cnpjCache.set(cnpj, resultado);
+  return resultado;
 }
 
 module.exports = { consultarCnpj };
