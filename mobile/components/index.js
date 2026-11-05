@@ -14,3 +14,13 @@ export { default as ClientFilterTabs } from './ClientFilterTabs';
 export { default as ClientSearchBar } from './ClientSearchBar';
 export { default as ClientEmptyState } from './ClientEmptyState';
 export { default as ClientErrorState } from './ClientErrorState';
+
+// Componentes modulares do formulário de clientes
+export {
+    default as ClientFormCnpjField,
+    formatCnpjInput,
+    extractCnpjDigits,
+} from './ClientFormCnpjField';
+export { default as ClientFormStatusSelector } from './ClientFormStatusSelector';
+export { default as ClientFormPotentialSelector } from './ClientFormPotentialSelector';
+export { default as ClientFormScoreSelector } from './ClientFormScoreSelector';
