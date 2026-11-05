@@ -9,3 +9,7 @@ export { default as NeumorphicView } from './NeumorphicView';
 export { default as WelcomeBar } from './WelcomeBar';
 export { default as MetricCard } from './MetricCard';
 export { default as QuickActionBar } from './QuickActionBar';
+export { default as ClientCard } from './ClientCard';
+export { default as ClientFilterTabs } from './ClientFilterTabs';
+export { default as ClientSearchBar } from './ClientSearchBar';
+export { default as ClientEmptyState } from './ClientEmptyState';
