@@ -258,7 +258,7 @@ export default function DashboardScreen({ navigation }) {
                 {/* Rodapé Informativo Clean */}
                 <View style={styles.footerNote}>
                     <Text style={[styles.footerText, { fontFamily: fontMedium }]}>
-                        Made by: Emanuel Silva, Mariana Barbosa, Otávio Chile e Paulo Martins | © 2024
+                        Made by: Emanuel Silva, Mariana Barbosa, Otávio Chile e Paulo Martins | © 2026
                     </Text>
                 </View>
             </ScrollView>
