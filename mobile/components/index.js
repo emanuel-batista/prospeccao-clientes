@@ -13,3 +13,4 @@ export { default as ClientCard } from './ClientCard';
 export { default as ClientFilterTabs } from './ClientFilterTabs';
 export { default as ClientSearchBar } from './ClientSearchBar';
 export { default as ClientEmptyState } from './ClientEmptyState';
+export { default as ClientErrorState } from './ClientErrorState';

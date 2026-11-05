@@ -11,6 +11,7 @@ import {
     StyleSheet,
     FlatList,
     RefreshControl,
+    ScrollView,
     TouchableOpacity,
     Platform,
     ActivityIndicator,
@@ -34,10 +35,11 @@ import {
     ClientFilterTabs,
     ClientSearchBar,
     ClientEmptyState,
+    ClientErrorState,
 } from '../../components';
 
 /**
- * Filtros rápidos disponíveis
+ * Filtros rápidos disponíveis no funil
  */
 const FILTER_TABS = [
     { id: 'all', label: 'Todos' },
@@ -45,52 +47,6 @@ const FILTER_TABS = [
     { id: 'alto', label: 'Alto Potencial' },
     { id: 'acompanhamento', label: 'Acompanhamento' },
     { id: 'convertido', label: 'Convertidos' },
-];
-
-/**
- * Fallback defensivo para ambiente de desenvolvimento ou conexão indisponível
- */
-const FALLBACK_CLIENTS = [
-    {
-        _id: 'client-1',
-        razao_social: 'TechCorp Inovações Ltda',
-        cnpj: '12345678000190',
-        situacao: 'Novo',
-        potencial_compra: 'Alto',
-        score: 85,
-    },
-    {
-        _id: 'client-2',
-        razao_social: 'Indústria Metalúrgica Brasil S/A',
-        cnpj: '98765432000110',
-        situacao: 'Em Negociação',
-        potencial_compra: 'Alto',
-        score: 92,
-    },
-    {
-        _id: 'client-3',
-        razao_social: 'Logística & Distribuição Express',
-        cnpj: '45123789000155',
-        situacao: 'Em Contato',
-        potencial_compra: 'Médio',
-        score: 64,
-    },
-    {
-        _id: 'client-4',
-        razao_social: 'Agropecuária Horizonte Verde',
-        cnpj: '33987654000122',
-        situacao: 'Fechado',
-        potencial_compra: 'Alto',
-        score: 95,
-    },
-    {
-        _id: 'client-5',
-        razao_social: 'Varejo Comercial Aliança',
-        cnpj: '77888999000144',
-        situacao: 'Novo',
-        potencial_compra: 'Baixo',
-        score: 42,
-    },
 ];
 
 /**
@@ -118,6 +74,7 @@ function normalizeRouteFilter(filterParam) {
 /**
  * ClientsListScreen
  * Lista comercial de clientes no padrão fintech contemporâneo e clean.
+ * Alinhada à 9ª Heurística de Nielsen para tratamento e diagnóstico de erros.
  */
 export default function ClientsListScreen({ navigation, route }) {
     const [fontsLoaded] = useFonts({
@@ -133,10 +90,14 @@ export default function ClientsListScreen({ navigation, route }) {
     const fontSemiBold = fontsLoaded
         ? 'Inter_600SemiBold'
         : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
+    const fontMedium = fontsLoaded
+        ? 'Inter_500Medium'
+        : Platform.select({ ios: 'System', android: 'sans-serif' });
 
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState(() =>
         normalizeRouteFilter(route.params?.filter)
@@ -156,7 +117,7 @@ export default function ClientsListScreen({ navigation, route }) {
         }
     }, [route.params?.filter]);
 
-    // Busca clientes da API com fallback defensivo
+    // Busca clientes da API com diagnóstico de conexão
     const loadClients = useCallback(async (isRefresh = false) => {
         if (isRefresh) {
             setRefreshing(true);
@@ -169,14 +130,28 @@ export default function ClientsListScreen({ navigation, route }) {
             const data = response.data;
             const items = Array.isArray(data) ? data : data?.clients || [];
 
-            if (items.length > 0) {
-                setClients(items);
-            } else {
-                setClients(FALLBACK_CLIENTS);
-            }
-        } catch (error) {
-            // Em caso de falha de conexão, preserva usabilidade com fallback
-            setClients(FALLBACK_CLIENTS);
+            setClients(items);
+            setError(null);
+        } catch (err) {
+            const isConnectionError =
+                !err.response ||
+                err.code === 'ECONNABORTED' ||
+                err.code === 'ERR_NETWORK' ||
+                (typeof err.message === 'string' &&
+                    (err.message.toLowerCase().includes('network') ||
+                        err.message.toLowerCase().includes('timeout') ||
+                        err.message.toLowerCase().includes('connect'))) ||
+                (err.response && err.response.status >= 500);
+
+            setError({
+                isConnection: isConnectionError,
+                title: isConnectionError
+                    ? 'Falha de conexão com o servidor'
+                    : 'Erro ao carregar clientes',
+                message: isConnectionError
+                    ? 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet e tente novamente.'
+                    : 'Ocorreu um erro ao carregar os clientes. Tente novamente mais tarde.',
+            });
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -321,6 +296,23 @@ export default function ClientsListScreen({ navigation, route }) {
                 </TouchableOpacity>
             </View>
 
+            {/* Banner de erro de conexão com recuperação rápida (caso já existam dados em cache) */}
+            {error && clients.length > 0 && (
+                <View style={styles.connectionBanner}>
+                    <MaterialIcons name="cloud-off" size={16} color="#DC2626" style={styles.bannerIcon} />
+                    <Text style={[styles.connectionBannerText, { fontFamily: fontMedium }]}>
+                        {error.message}
+                    </Text>
+                    <TouchableOpacity
+                        onPress={() => loadClients(true)}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Text style={[styles.retryBannerText, { fontFamily: fontSemiBold }]}>
+                            Tentar novamente
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
             {/* 2. Barra de Busca */}
             <View style={styles.searchWrapper}>
                 <ClientSearchBar
@@ -340,11 +332,30 @@ export default function ClientsListScreen({ navigation, route }) {
                 />
             </View>
 
-            {/* 4. Lista Principal de Clientes */}
+            {/* 4. Conteúdo: Carregamento, Erro de Conexão ou Lista */}
             {loading && !refreshing ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="small" color="#080A96" />
                 </View>
+            ) : error && clients.length === 0 ? (
+                /* 9ª Heurística de Nielsen: Reconhecer, Diagnosticar e Recuperar */
+                <ScrollView
+                    contentContainerStyle={styles.centerScrollContainer}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => loadClients(true)}
+                            colors={['#080A96']}
+                            tintColor="#080A96"
+                        />
+                    }>
+                    <ClientErrorState
+                        title={error.title}
+                        message={error.message}
+                        onRetry={() => loadClients(false)}
+                    />
+                </ScrollView>
             ) : (
                 <FlatList
                     data={filteredClients}
@@ -443,6 +454,31 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#FFFFFF',
     },
+    connectionBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FEF2F2',
+        borderWidth: 1,
+        borderColor: '#FECACA',
+        borderRadius: 12,
+        marginHorizontal: 20,
+        marginBottom: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 9,
+    },
+    bannerIcon: {
+        marginRight: 8,
+    },
+    connectionBannerText: {
+        fontSize: 12,
+        color: '#991B1B',
+        flex: 1,
+    },
+    retryBannerText: {
+        fontSize: 12,
+        color: '#080A96',
+        marginLeft: 8,
+    },
     searchWrapper: {
         paddingHorizontal: 20,
         marginBottom: 12,
@@ -458,5 +494,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    centerScrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
     },
 });

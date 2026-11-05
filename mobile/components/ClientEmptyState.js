@@ -10,12 +10,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import {
     useFonts,
     Inter_600SemiBold,
-    Inter_400Regular,
+    Inter_500Medium,
 } from '@expo-google-fonts/inter';
 
 /**
  * ClientEmptyState
- * Estado vazio clean e intuitivo exibido quando a lista está sem itens.
+ * Estado limpo e objetivo para quando a lista de clientes estiver vazia.
+ * Sem emojis ou descrições excessivas.
  */
 export default function ClientEmptyState({
     isFiltered = false,
@@ -25,53 +26,60 @@ export default function ClientEmptyState({
 }) {
     const [fontsLoaded] = useFonts({
         Inter_600SemiBold,
-        Inter_400Regular,
+        Inter_500Medium,
     });
 
     const fontSemiBold = fontsLoaded
         ? 'Inter_600SemiBold'
         : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontRegular = fontsLoaded
-        ? 'Inter_400Regular'
+    const fontMedium = fontsLoaded
+        ? 'Inter_500Medium'
         : Platform.select({ ios: 'System', android: 'sans-serif' });
 
-    const title = isFiltered
-        ? 'Nenhum cliente encontrado'
-        : 'Nenhum cliente cadastrado';
+    if (isFiltered) {
+        return (
+            <View style={[styles.container, style]}>
+                <View style={styles.iconCircle}>
+                    <MaterialIcons name="search-off" size={32} color="#64748B" />
+                </View>
 
-    const description = isFiltered
-        ? 'Tente ajustar os termos de busca ou alterar o filtro selecionado.'
-        : 'Cadastre sua primeira oportunidade comercial para iniciar a prospecção.';
+                <Text style={[styles.title, { fontFamily: fontMedium }]}>
+                    Nenhum cliente encontrado
+                </Text>
 
-    const actionText = isFiltered ? 'Limpar filtros' : 'Cadastrar cliente';
-    const handleAction = isFiltered ? onResetFilters : onNewClient;
+                {onResetFilters && (
+                    <TouchableOpacity
+                        onPress={onResetFilters}
+                        activeOpacity={0.8}
+                        style={styles.actionButton}
+                        accessibilityRole="button">
+                        <Text style={[styles.actionText, { fontFamily: fontSemiBold }]}>
+                            Limpar filtros
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    }
 
     return (
         <View style={[styles.container, style]}>
             <View style={styles.iconCircle}>
-                <MaterialIcons
-                    name={isFiltered ? 'search-off' : 'business'}
-                    size={32}
-                    color="#64748B"
-                />
+                <MaterialIcons name="format-list-bulleted" size={32} color="#64748B" />
             </View>
 
-            <Text style={[styles.title, { fontFamily: fontSemiBold }]}>
-                {title}
+            <Text style={[styles.title, { fontFamily: fontMedium }]}>
+                Não há clientes cadastrados
             </Text>
 
-            <Text style={[styles.description, { fontFamily: fontRegular }]}>
-                {description}
-            </Text>
-
-            {handleAction && (
+            {onNewClient && (
                 <TouchableOpacity
-                    onPress={handleAction}
+                    onPress={onNewClient}
                     activeOpacity={0.8}
                     style={styles.actionButton}
                     accessibilityRole="button">
                     <Text style={[styles.actionText, { fontFamily: fontSemiBold }]}>
-                        {actionText}
+                        Cadastrar cliente
                     </Text>
                 </TouchableOpacity>
             )}
@@ -83,7 +91,7 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 48,
+        paddingVertical: 56,
         paddingHorizontal: 24,
     },
     iconCircle: {
@@ -93,28 +101,20 @@ const styles = StyleSheet.create({
         backgroundColor: '#F1F5F9',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 16,
+        marginBottom: 14,
     },
     title: {
-        fontSize: 16,
-        color: '#0F172A',
+        fontSize: 15,
+        color: '#475569',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 16,
         letterSpacing: -0.2,
     },
-    description: {
-        fontSize: 13,
-        color: '#64748B',
-        textAlign: 'center',
-        lineHeight: 18,
-        maxWidth: 280,
-        marginBottom: 20,
-    },
     actionButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 18,
+        paddingVertical: 9,
+        paddingHorizontal: 16,
         backgroundColor: '#FFFFFF',
-        borderRadius: 20,
+        borderRadius: 18,
         borderWidth: 1,
         borderColor: '#CBD5E1',
         ...Platform.select({
@@ -137,4 +137,3 @@ const styles = StyleSheet.create({
         color: '#080A96',
     },
 });
-
