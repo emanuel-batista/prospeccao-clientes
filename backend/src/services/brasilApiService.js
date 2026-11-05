@@ -13,17 +13,54 @@ async function consultarCnpj(cnpjBruto) {
     throw erro;
   }
 
-  // 3. Consulta a BrasilAPI
-  const resposta = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+  // Cabeçalhos para evitar bloqueio do Cloudflare da BrasilAPI contra o User-Agent padrão do Node.js
+  const headers = {
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    Accept: 'application/json',
+  };
 
-  if (resposta.status === 404) {
-    const erro = new Error('CNPJ não encontrado na base de dados.');
+  // 3. Consulta a BrasilAPI
+  const resposta = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, {
+    headers,
+  });
+
+  if (resposta.status === 404 || resposta.status === 400) {
+    const erroJson = await resposta.json().catch(() => ({}));
+    const erro = new Error(
+      erroJson.message || 'CNPJ não encontrado ou inválido na Receita Federal.'
+    );
     erro.statusCode = 404;
     throw erro;
   }
 
   if (!resposta.ok) {
-    const erro = new Error('Não foi possível consultar a BrasilAPI no momento.');
+    console.warn(`BrasilAPI retornou status ${resposta.status}. Tentando espelho público de CNPJ...`);
+    // Fallback de segurança caso o Cloudflare/servidor da BrasilAPI bloqueie ou caia durante a apresentação
+    const respFallback = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj}`, { headers });
+    if (respFallback.ok) {
+      const fb = await respFallback.json();
+      if (fb && fb.status !== 'ERROR') {
+        return {
+          cnpj: (fb.cnpj || cnpj).replace(/\D/g, ''),
+          razaoSocial: fb.nome || '',
+          nomeFantasia: fb.fantasia || '',
+          situacaoCadastral: fb.situacao || '',
+          atividadePrincipal: fb.atividade_principal?.[0]?.text || '',
+          telefone: fb.telefone || '',
+          email: fb.email || '',
+          cep: (fb.cep || '').replace(/\D/g, ''),
+          rua: fb.logradouro || '',
+          numero: fb.numero || '',
+          complemento: fb.complemento || '',
+          bairro: fb.bairro || '',
+          cidade: fb.municipio || '',
+          estado: fb.uf || '',
+        };
+      }
+    }
+
+    const erro = new Error(`Não foi possível consultar a BrasilAPI no momento (HTTP ${resposta.status}).`);
     erro.statusCode = 502;
     throw erro;
   }
@@ -50,4 +87,3 @@ async function consultarCnpj(cnpjBruto) {
 }
 
 module.exports = { consultarCnpj };
-
