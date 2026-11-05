@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
@@ -15,6 +16,9 @@ connectDB();
 
 app.use(cors());
 app.use(express.json());
+
+// Servir arquivos de upload (fotos/avatares) publicamente
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Rota básica para testar se o servidor está no ar
 app.get('/', (req, res) => {
