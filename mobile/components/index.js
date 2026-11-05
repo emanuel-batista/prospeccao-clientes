@@ -29,3 +29,9 @@ export {
 export { default as ClientFormStatusSelector } from './ClientFormStatusSelector';
 export { default as ClientFormPotentialSelector } from './ClientFormPotentialSelector';
 export { default as ClientFormScoreSelector } from './ClientFormScoreSelector';
+
+// Componentes modulares do chat com Assistente IA
+export { default as AiOrb } from './AiOrb';
+export { default as AiChatMessageBubble } from './AiChatMessageBubble';
+export { default as AiChatPromptSuggestions } from './AiChatPromptSuggestions';
+export { default as AiChatComposer } from './AiChatComposer';
