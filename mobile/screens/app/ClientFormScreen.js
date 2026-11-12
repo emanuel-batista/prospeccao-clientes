@@ -42,6 +42,17 @@ function normalizePotential(value) {
     return 'Médio';
 }
 
+function getSuggestedScore(potential) {
+    switch (normalizePotential(potential)) {
+        case 'Baixo':
+            return 25;
+        case 'Alto':
+            return 75;
+        default:
+            return 50;
+    }
+}
+
 function normalizeStatus(value) {
     if (!value) return 'Novo';
     const v = String(value).toLowerCase();
@@ -93,6 +104,11 @@ export default function ClientFormScreen({ navigation, route }) {
         potencialCompra: normalizePotential(routeClient?.potencial_compra || routeClient?.potencialCompra || routeClient?.potencial),
         score: Number(routeClient?.score ?? 50),
     }));
+
+    const handlePotentialChange = (potential) => {
+        setPotencialCompra(potential);
+        setScore(getSuggestedScore(potential));
+    };
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -382,9 +398,12 @@ export default function ClientFormScreen({ navigation, route }) {
                         {/* Potencial de Compra */}
                         <ClientFormPotentialSelector
                             value={potencialCompra}
-                            onChange={setPotencialCompra}
+                            onChange={handlePotentialChange}
                             disabled={submitting || deleting}
                         />
+                        <Text style={[styles.scoreSuggestion, { fontFamily: fontRegular }]}>
+                            Score sugerido: {getSuggestedScore(potencialCompra)} pontos. Você pode ajustá-lo abaixo.
+                        </Text>
 
                         {/* Score */}
                         <ClientFormScoreSelector
@@ -461,6 +480,12 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#E2E8F0',
         marginVertical: 18,
+    },
+    scoreSuggestion: {
+        fontSize: 12,
+        color: '#64748B',
+        marginTop: -12,
+        marginBottom: 14,
     },
     fieldContainer: {
         marginBottom: 16,
