@@ -4,9 +4,8 @@ import {
     Text,
     ActivityIndicator,
     StyleSheet,
-    Platform,
 } from 'react-native';
-import { useFonts, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 export default function Button({
     title,
@@ -17,11 +16,7 @@ export default function Button({
     textStyle,
     ...rest
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-    });
-
-    const fontSemiBold = fontsLoaded ? 'Inter_600SemiBold' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
+    const fontSemiBold = FONTS.semiBold;
 
     return (
         <TouchableOpacity

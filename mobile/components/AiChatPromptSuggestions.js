@@ -8,13 +8,7 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-    useFonts,
-    Inter_700Bold,
-    Inter_600SemiBold,
-    Inter_500Medium,
-    Inter_400Regular,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 import AiOrb from './AiOrb';
 
 /**
@@ -62,25 +56,10 @@ export default function AiChatPromptSuggestions({
     disabled = false,
     variant = 'empty', // 'empty' | 'pills'
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_700Bold,
-        Inter_600SemiBold,
-        Inter_500Medium,
-        Inter_400Regular,
-    });
-
-    const fontBold = fontsLoaded
-        ? 'Inter_700Bold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
-    const fontRegular = fontsLoaded
-        ? 'Inter_400Regular'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontBold = FONTS.bold;
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
+    const fontRegular = FONTS.regular;
 
     const clientName =
         clientContext?.razao_social ||

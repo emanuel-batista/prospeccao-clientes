@@ -57,7 +57,40 @@ export const AuthProvider = ({ children }) => {
         const payload = typeof name === 'object'
             ? name
             : { name, email, password, companyName, document, avatarUri };
-        await api.post('/auth/register', payload);
+
+        const targetAvatar = payload.avatarUri;
+        const isLocalFile = typeof targetAvatar === 'string' && (
+            targetAvatar.startsWith('file://') ||
+            targetAvatar.startsWith('content://')
+        );
+
+        if (isLocalFile) {
+            const formData = new FormData();
+            formData.append('name', payload.name || '');
+            formData.append('email', payload.email || '');
+            formData.append('password', payload.password || '');
+            if (payload.companyName) formData.append('companyName', payload.companyName);
+            if (payload.document) formData.append('document', payload.document);
+
+            const filename = targetAvatar.split('/').pop() || 'avatar.jpg';
+            const match = /\.(\w+)$/.exec(filename);
+            const ext = match ? match[1].toLowerCase() : 'jpg';
+            const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+
+            formData.append('avatar', {
+                uri: targetAvatar,
+                name: filename,
+                type: mimeType,
+            });
+
+            await api.post('/auth/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        } else {
+            await api.post('/auth/register', payload);
+        }
     }
 
     return (

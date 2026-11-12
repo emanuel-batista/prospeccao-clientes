@@ -7,11 +7,7 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-    useFonts,
-    Inter_600SemiBold,
-    Inter_500Medium,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 /**
  * ClientEmptyState
@@ -24,17 +20,8 @@ export default function ClientEmptyState({
     onNewClient,
     style,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-        Inter_500Medium,
-    });
-
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
 
     if (isFiltered) {
         return (

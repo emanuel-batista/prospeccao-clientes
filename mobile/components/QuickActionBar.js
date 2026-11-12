@@ -4,10 +4,9 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFonts, Inter_700Bold, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 import NeumorphicView from './NeumorphicView';
 
 /**
@@ -27,13 +26,8 @@ export default function QuickActionBar({
 }) {
     const [pressedId, setPressedId] = useState(null);
 
-    const [fontsLoaded] = useFonts({
-        Inter_700Bold,
-        Inter_600SemiBold,
-    });
-
-    const fontBold = fontsLoaded ? 'Inter_700Bold' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontSemiBold = fontsLoaded ? 'Inter_600SemiBold' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
+    const fontBold = FONTS.bold;
+    const fontSemiBold = FONTS.semiBold;
 
     const actions = [
         {

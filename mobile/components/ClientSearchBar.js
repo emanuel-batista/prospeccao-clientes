@@ -7,7 +7,7 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 /**
  * ClientSearchBar
@@ -20,13 +20,7 @@ export default function ClientSearchBar({
     placeholder = 'Buscar por razão social ou CNPJ...',
     style,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_400Regular,
-    });
-
-    const fontRegular = fontsLoaded
-        ? 'Inter_400Regular'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontRegular = FONTS.regular;
 
     const hasText = Boolean(value && value.trim().length > 0);
 

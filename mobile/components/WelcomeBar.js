@@ -9,7 +9,8 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFonts, Inter_700Bold, Inter_500Medium, Inter_400Regular } from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
+import { resolveAvatarUrl } from '../services/api';
 
 /**
  * WelcomeBar (Sway Finance / Modern Fintech Light Theme)
@@ -20,15 +21,9 @@ import { useFonts, Inter_700Bold, Inter_500Medium, Inter_400Regular } from '@exp
  * - Botão de logout sutil com confirmação nativa de saída
  */
 export default function WelcomeBar({ user, onLogout, isOffline = false }) {
-    const [fontsLoaded] = useFonts({
-        Inter_700Bold,
-        Inter_500Medium,
-        Inter_400Regular,
-    });
-
-    const fontBold = fontsLoaded ? 'Inter_700Bold' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded ? 'Inter_500Medium' : Platform.select({ ios: 'System', android: 'sans-serif' });
-    const fontRegular = fontsLoaded ? 'Inter_400Regular' : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontBold = FONTS.bold;
+    const fontMedium = FONTS.medium;
+    const fontRegular = FONTS.regular;
 
     const getFirstName = () => {
         if (!user || typeof user.name !== 'string' || !user.name.trim()) {
@@ -77,7 +72,7 @@ export default function WelcomeBar({ user, onLogout, isOffline = false }) {
                 <View style={styles.avatarWrapper}>
                     {user?.avatarUri ? (
                         <Image
-                            source={{ uri: user.avatarUri }}
+                            source={{ uri: resolveAvatarUrl(user.avatarUri) }}
                             style={styles.avatarImage}
                             resizeMode="cover"
                         />

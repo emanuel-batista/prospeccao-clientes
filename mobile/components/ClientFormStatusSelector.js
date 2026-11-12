@@ -4,14 +4,9 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    Platform,
     ScrollView,
 } from 'react-native';
-import {
-    useFonts,
-    Inter_600SemiBold,
-    Inter_500Medium,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 export const STATUS_OPTIONS = [
     { id: 'Novo', label: 'Novo', color: '#0284C7' },
@@ -30,17 +25,8 @@ export default function ClientFormStatusSelector({
     onChange,
     disabled = false,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-        Inter_500Medium,
-    });
-
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
 
     return (
         <View style={styles.container}>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
-import { useFonts, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { FONTS } from '../constants/fonts';
 
 export default function AuthLink({
     text,
@@ -8,13 +8,8 @@ export default function AuthLink({
     onPress,
     style,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_500Medium,
-        Inter_600SemiBold,
-    });
-
-    const fontMedium = fontsLoaded ? 'Inter_500Medium' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontSemiBold = fontsLoaded ? 'Inter_600SemiBold' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
+    const fontMedium = FONTS.medium;
+    const fontSemiBold = FONTS.semiBold;
 
     return (
         <TouchableOpacity

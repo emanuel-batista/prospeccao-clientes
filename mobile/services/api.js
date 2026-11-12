@@ -43,4 +43,21 @@ api.interceptors.response.use(
     }
 );
 
+// Helper para resolver URL de avatar (relativa do backend ou absoluta)
+export const resolveAvatarUrl = (uri) => {
+    if (!uri) return null;
+    if (
+        uri.startsWith('http://') ||
+        uri.startsWith('https://') ||
+        uri.startsWith('file://') ||
+        uri.startsWith('content://')
+    ) {
+        return uri;
+    }
+    const baseURL = api.defaults.baseURL || process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+    const cleanBase = baseURL.replace(/\/+$/, '');
+    const cleanUri = uri.replace(/^\/+/, '');
+    return `${cleanBase}/${cleanUri}`;
+};
+
 export default api;

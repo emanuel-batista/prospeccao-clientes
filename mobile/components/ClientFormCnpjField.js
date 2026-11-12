@@ -9,12 +9,7 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-    useFonts,
-    Inter_600SemiBold,
-    Inter_500Medium,
-    Inter_400Regular,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 import api from '../services/api';
 
 export function formatCnpjInput(text) {
@@ -43,21 +38,9 @@ export default function ClientFormCnpjField({
     error,
     disabled = false,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-        Inter_500Medium,
-        Inter_400Regular,
-    });
-
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
-    const fontRegular = fontsLoaded
-        ? 'Inter_400Regular'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
+    const fontRegular = FONTS.regular;
 
     const [isFocused, setIsFocused] = useState(false);
     const [isSearching, setIsSearching] = useState(false);

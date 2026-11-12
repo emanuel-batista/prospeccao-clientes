@@ -6,11 +6,7 @@ import {
     StyleSheet,
     Platform,
 } from 'react-native';
-import {
-    useFonts,
-    Inter_600SemiBold,
-    Inter_500Medium,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 export const POTENTIAL_OPTIONS = [
     { id: 'Baixo', label: 'Baixo', color: '#64748B' },
@@ -27,17 +23,8 @@ export default function ClientFormPotentialSelector({
     onChange,
     disabled = false,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-        Inter_500Medium,
-    });
-
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
 
     return (
         <View style={styles.container}>

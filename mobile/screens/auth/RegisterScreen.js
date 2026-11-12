@@ -9,7 +9,7 @@ import {
     Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFonts, Inter_500Medium } from '@expo-google-fonts/inter';
+import { FONTS } from '../../constants/fonts';
 import { useAuth } from '../../hooks/useAuth';
 import { Input, Button, AvatarPicker, BackButton, AuthLink } from '../../components';
 
@@ -26,11 +26,7 @@ export default function RegisterScreen({ navigation }) {
 
     const [loading, setLoading] = useState(false);
 
-    const [fontsLoaded] = useFonts({
-        Inter_500Medium,
-    });
-
-    const fontMedium = fontsLoaded ? 'Inter_500Medium' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
+    const fontMedium = FONTS.medium;
 
     // Máscara dinâmica para CPF (11 dígitos) ou CNPJ (14 dígitos)
     function handleDocumentChange(text) {

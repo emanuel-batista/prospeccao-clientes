@@ -11,12 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-    useFonts,
-    Inter_700Bold,
-    Inter_500Medium,
-    Inter_400Regular,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../../constants/fonts';
 
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
@@ -34,15 +29,9 @@ import { WelcomeBar, MetricCard, QuickActionBar } from '../../components';
 export default function DashboardScreen({ navigation }) {
     const { user, logout } = useAuth();
 
-    const [fontsLoaded] = useFonts({
-        Inter_700Bold,
-        Inter_500Medium,
-        Inter_400Regular,
-    });
-
-    const fontBold = fontsLoaded ? 'Inter_700Bold' : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded ? 'Inter_500Medium' : Platform.select({ ios: 'System', android: 'sans-serif' });
-    const fontRegular = fontsLoaded ? 'Inter_400Regular' : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontBold = FONTS.bold;
+    const fontMedium = FONTS.medium;
+    const fontRegular = FONTS.regular;
 
     // Estado dos 5 indicadores do escopo
     const [metrics, setMetrics] = useState({

@@ -5,13 +5,8 @@ import {
     Text,
     View,
     StyleSheet,
-    Platform,
 } from 'react-native';
-import {
-    useFonts,
-    Inter_600SemiBold,
-    Inter_500Medium,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 /**
  * ClientFilterTabs
@@ -24,17 +19,8 @@ export default function ClientFilterTabs({
     counts = {},
     style,
 }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-        Inter_500Medium,
-    });
-
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
 
     return (
         <ScrollView

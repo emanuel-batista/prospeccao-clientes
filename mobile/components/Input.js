@@ -4,11 +4,10 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    Platform,
     Text,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 export default function Input({
     icon,
@@ -27,11 +26,7 @@ export default function Input({
     const [focused, setFocused] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const [fontsLoaded] = useFonts({
-        Inter_400Regular,
-    });
-
-    const fontRegular = fontsLoaded ? 'Inter_400Regular' : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontRegular = FONTS.regular;
 
     return (
         <View style={[styles.container, containerStyle]}>

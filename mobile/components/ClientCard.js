@@ -7,12 +7,7 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-    useFonts,
-    Inter_600SemiBold,
-    Inter_500Medium,
-    Inter_400Regular,
-} from '@expo-google-fonts/inter';
+import { FONTS } from '../constants/fonts';
 
 /**
  * Utilitário de formatação de CNPJ
@@ -92,21 +87,9 @@ export function getPotentialColor(potencial, score) {
  * Card minimalista e clean para apresentação de oportunidades na lista de clientes.
  */
 export default function ClientCard({ client, onPress, style }) {
-    const [fontsLoaded] = useFonts({
-        Inter_600SemiBold,
-        Inter_500Medium,
-        Inter_400Regular,
-    });
-
-    const fontSemiBold = fontsLoaded
-        ? 'Inter_600SemiBold'
-        : Platform.select({ ios: 'System', android: 'sans-serif-medium' });
-    const fontMedium = fontsLoaded
-        ? 'Inter_500Medium'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
-    const fontRegular = fontsLoaded
-        ? 'Inter_400Regular'
-        : Platform.select({ ios: 'System', android: 'sans-serif' });
+    const fontSemiBold = FONTS.semiBold;
+    const fontMedium = FONTS.medium;
+    const fontRegular = FONTS.regular;
 
     if (!client) return null;
 
