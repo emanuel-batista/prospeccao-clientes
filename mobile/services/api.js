@@ -6,6 +6,13 @@ const api = axios.create({
     timeout: 10000,
 });
 
+// Callback para notificar o contexto de autenticação React sobre status 401
+let onUnauthorizedCallback = null;
+
+export const registerUnauthorizedHandler = (callback) => {
+    onUnauthorizedCallback = callback;
+};
+
 api.interceptors.request.use(
     async (config) => {
         const token = await AsyncStorage.getItem('@prospeccao:token');
@@ -23,7 +30,14 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response && error.response.status === 401) {
-            await AsyncStorage.multiRemove(['@prospeccao:token', '@prospeccao:user']);
+            const isLoginRequest = error.config?.url?.includes('/auth/login');
+
+            if (!isLoginRequest) {
+                await AsyncStorage.multiRemove(['@prospeccao:token', '@prospeccao:user']);
+                if (typeof onUnauthorizedCallback === 'function') {
+                    onUnauthorizedCallback();
+                }
+            }
         }
         return Promise.reject(error);
     }

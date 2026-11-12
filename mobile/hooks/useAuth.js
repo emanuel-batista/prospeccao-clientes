@@ -1,12 +1,28 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../services/api';
+import api, { registerUnauthorizedHandler } from '../services/api';
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const logout = useCallback(async () => {
+        await AsyncStorage.multiRemove(['@prospeccao:token', '@prospeccao:user']);
+        setUser(null);
+    }, []);
+
+    useEffect(() => {
+        // Registra o callback para que o interceptor do Axios notifique o estado quando ocorrer 401
+        registerUnauthorizedHandler(() => {
+            setUser(null);
+        });
+
+        return () => {
+            registerUnauthorizedHandler(null);
+        };
+    }, []);
 
     useEffect(() => {
         async function loadStorageData() {
@@ -42,11 +58,6 @@ export const AuthProvider = ({ children }) => {
             ? name
             : { name, email, password, companyName, document, avatarUri };
         await api.post('/auth/register', payload);
-    }
-
-    async function logout() {
-        await AsyncStorage.multiRemove(['@prospeccao:token', '@prospeccao:user']);
-        setUser(null);
     }
 
     return (
