@@ -189,9 +189,9 @@ async function analisarOportunidades(userId) {
 }
 
 /**
- * Executa a conversa com o Gemini utilizando Function Calling
+ * Executa a conversa com o Gemini utilizando Function Calling e contexto de histórico
  */
-async function conversarComIA(mensagemUsuario, userId) {
+async function conversarComIA(mensagemUsuario, userId, historico = [], clientContext = null) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey === 'coloque_sua_chave_do_google_ai_studio_aqui') {
@@ -205,14 +205,63 @@ async function conversarComIA(mensagemUsuario, userId) {
   const ai = new GoogleGenAI({ apiKey });
   const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-  const systemInstruction =
+  let systemInstruction =
     'Você é um assistente comercial inteligente de prospecção de clientes B2B. ' +
     'Responda sempre em Português do Brasil, de forma objetiva, clara e útil para o vendedor. ' +
     'Sempre que o vendedor perguntar sobre seus clientes, oportunidades ou carteira, ' +
     'utilize as ferramentas disponíveis (listarClientes, consultarCliente, analisarOportunidades) ' +
     'para consultar os dados reais antes de responder.';
 
-  const contents = [{ role: 'user', parts: [{ text: mensagemUsuario }] }];
+  if (clientContext) {
+    const nomeCliente = typeof clientContext === 'string'
+      ? clientContext
+      : (clientContext.nomeFantasia || clientContext.razao_social || clientContext.razaoSocial || clientContext.name || '');
+    if (nomeCliente) {
+      systemInstruction += ` Contexto atual da tela: O vendedor está consultando o cliente "${nomeCliente}". Se o usuário fizer perguntas contextuais como "qual o CNPJ dele?", "qual a situação dele?" ou similares, assuma prioritariamente que ele se refere a "${nomeCliente}".`;
+    }
+  }
+
+  // Monta histórico de conteúdos para o Gemini respeitando a ordem e roles ('user' e 'model')
+  const contents = [];
+
+  if (Array.isArray(historico)) {
+    // Aplica janela deslizante com as últimas 10 mensagens para economizar tokens
+    const historicoRecente = historico.slice(-10);
+
+    for (const item of historicoRecente) {
+      const role = (item.role === 'assistant' || item.role === 'model') ? 'model' : 'user';
+      const text = String(item.text || item.content || '').trim();
+
+      if (!text) continue;
+
+      // O Gemini exige que a primeira mensagem do histórico venha do 'user'
+      if (contents.length === 0 && role !== 'user') {
+        continue;
+      }
+
+      // Se mensagens consecutivas tiverem o mesmo role, agrupa o texto
+      const ultimo = contents[contents.length - 1];
+      if (ultimo && ultimo.role === role) {
+        ultimo.parts[0].text += `\n${text}`;
+      } else {
+        contents.push({
+          role,
+          parts: [{ text }],
+        });
+      }
+    }
+  }
+
+  // Adiciona a pergunta atual do usuário no final do histórico
+  const ultimo = contents[contents.length - 1];
+  if (ultimo && ultimo.role === 'user') {
+    ultimo.parts[0].text += `\n${mensagemUsuario}`;
+  } else {
+    contents.push({
+      role: 'user',
+      parts: [{ text: mensagemUsuario }],
+    });
+  }
 
   let response = await ai.models.generateContent({
     model,

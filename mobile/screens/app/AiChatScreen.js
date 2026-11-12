@@ -12,6 +12,7 @@ import {
     TouchableOpacity,
     Platform,
     KeyboardAvoidingView,
+    Keyboard,
     Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -119,6 +120,11 @@ export default function AiChatScreen({ navigation, route }) {
     const flatListRef = useRef(null);
     const processedInitialPromptRef = useRef('');
     const isSendingRef = useRef(false);
+    const messagesRef = useRef(messages);
+
+    useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -153,6 +159,22 @@ export default function AiChatScreen({ navigation, route }) {
             const userMsgId = `user_${Date.now()}`;
             const loadingMsgId = `loading_${Date.now() + 1}`;
 
+            // Captura o histórico prévio antes de enfileirar a nova mensagem
+            // Aplica janela deslizante (últimas 8 mensagens) para manter o contexto sem estourar tokens
+            const historyPayload = (messagesRef.current || [])
+                .filter(
+                    (m) =>
+                        !m.isLoading &&
+                        !m.isError &&
+                        m.text &&
+                        m.id !== retryMessageId
+                )
+                .slice(-8)
+                .map((m) => ({
+                    role: m.role,
+                    text: m.text,
+                }));
+
             setMessages((prev) => {
                 const filtered = retryMessageId
                     ? prev.filter((m) => m.id !== retryMessageId)
@@ -179,9 +201,18 @@ export default function AiChatScreen({ navigation, route }) {
             scrollToBottom();
 
             try {
+                const payload = {
+                    message: promptToSend,
+                    history: historyPayload,
+                };
+
+                if (clientContext) {
+                    payload.clientContext = clientContext;
+                }
+
                 const response = await api.post(
                     '/ai/chat',
-                    { message: promptToSend },
+                    payload,
                     { timeout: 25000 }
                 );
 
@@ -230,7 +261,7 @@ export default function AiChatScreen({ navigation, route }) {
                 scrollToBottom();
             }
         },
-        [inputText, scrollToBottom]
+        [inputText, scrollToBottom, clientContext]
     );
 
     useEffect(() => {
@@ -248,11 +279,30 @@ export default function AiChatScreen({ navigation, route }) {
         }
     }, [route.params?.client, route.params?.initialPrompt, sendMessage]);
 
+    // Rola automaticamente para o fim ao abrir o teclado para não cobrir o chat
+    useEffect(() => {
+        const showEvent =
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+
+        const keyboardSub = Keyboard.addListener(showEvent, () => {
+            setTimeout(() => {
+                if (flatListRef.current && (messagesRef.current?.length > 0)) {
+                    flatListRef.current.scrollToEnd({ animated: true });
+                }
+            }, 100);
+        });
+
+        return () => {
+            keyboardSub.remove();
+        };
+    }, []);
+
     const handleClearChat = () => {
         if (messages.length === 0 || loading) return;
 
         const doClear = () => {
             setMessages([]);
+            messagesRef.current = [];
         };
 
         const msg = 'Deseja iniciar uma nova conversa limpa?';
@@ -298,54 +348,56 @@ export default function AiChatScreen({ navigation, route }) {
                 </Svg>
             </View>
 
-            {/* 1. Header Minimalista (Sem badges, apenas botões circulares e marca central) */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={styles.circleHeaderBtn}
-                    activeOpacity={0.75}
-                    accessibilityRole="button"
-                    accessibilityLabel="Voltar">
-                    <MaterialIcons name="arrow-back" size={20} color="#0F172A" />
-                </TouchableOpacity>
-
-                <View style={styles.centerBrandMark}>
-                    <Logo size={24} color="#080A96" />
-                </View>
-
-                {messages.length > 0 ? (
+            <KeyboardAvoidingView
+                style={styles.keyboardContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}>
+                {/* 1. Header Minimalista (Sem badges, apenas botões circulares e marca central) */}
+                <View style={styles.header}>
                     <TouchableOpacity
-                        onPress={handleClearChat}
-                        disabled={loading}
-                        style={[
-                            styles.circleHeaderBtn,
-                            loading && styles.btnDisabled,
-                        ]}
-                        activeOpacity={0.75}
-                        accessibilityRole="button"
-                        accessibilityLabel="Nova conversa">
-                        <MaterialIcons name="restart-alt" size={20} color="#0F172A" />
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('ClientsList')}
+                        onPress={() => navigation.goBack()}
                         style={styles.circleHeaderBtn}
                         activeOpacity={0.75}
                         accessibilityRole="button"
-                        accessibilityLabel="Ver lista de clientes">
-                        <MaterialIcons name="people-outline" size={19} color="#0F172A" />
+                        accessibilityLabel="Voltar">
+                        <MaterialIcons name="arrow-back" size={20} color="#0F172A" />
                     </TouchableOpacity>
-                )}
-            </View>
 
-            {/* 2. Área Central: Esfera 3D no Zero-State ou Fluxo Limpo de Conversa */}
-            <KeyboardAvoidingView
-                style={styles.keyboardContainer}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                    <View style={styles.centerBrandMark}>
+                        <Logo size={24} color="#080A96" />
+                    </View>
+
+                    {messages.length > 0 ? (
+                        <TouchableOpacity
+                            onPress={handleClearChat}
+                            disabled={loading}
+                            style={[
+                                styles.circleHeaderBtn,
+                                loading && styles.btnDisabled,
+                            ]}
+                            activeOpacity={0.75}
+                            accessibilityRole="button"
+                            accessibilityLabel="Nova conversa">
+                            <MaterialIcons name="restart-alt" size={20} color="#0F172A" />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('ClientsList')}
+                            style={styles.circleHeaderBtn}
+                            activeOpacity={0.75}
+                            accessibilityRole="button"
+                            accessibilityLabel="Ver lista de clientes">
+                            <MaterialIcons name="people-outline" size={19} color="#0F172A" />
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* 2. Área Central: Esfera 3D no Zero-State ou Fluxo Limpo de Conversa */}
                 <FlatList
                     ref={flatListRef}
                     data={messages}
                     keyExtractor={(item) => item.id}
+                    style={styles.messagesList}
                     renderItem={({ item }) => (
                         <AiChatMessageBubble
                             message={item}
@@ -440,6 +492,9 @@ const styles = StyleSheet.create({
         opacity: 0.45,
     },
     keyboardContainer: {
+        flex: 1,
+    },
+    messagesList: {
         flex: 1,
     },
     messagesListContent: {

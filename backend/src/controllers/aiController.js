@@ -7,6 +7,8 @@ async function chatComIA(req, res) {
   try {
     // Aceita "message", "pergunta" ou "prompt" enviados pelo frontend
     const mensagem = req.body.message || req.body.pergunta || req.body.prompt;
+    const historico = req.body.history || req.body.historico || [];
+    const clientContext = req.body.clientContext || req.body.client || null;
 
     if (!mensagem || !String(mensagem).trim()) {
       return res.status(400).json({
@@ -17,7 +19,12 @@ async function chatComIA(req, res) {
     // Garante que a IA consulte apenas os dados do usuário autenticado
     const userId = req.userId || req.user?.id || req.user?._id || 'usuario_teste_local';
 
-    const resposta = await conversarComIA(String(mensagem).trim(), userId);
+    const resposta = await conversarComIA(
+      String(mensagem).trim(),
+      userId,
+      historico,
+      clientContext
+    );
 
     return res.status(200).json({
       reply: resposta,
