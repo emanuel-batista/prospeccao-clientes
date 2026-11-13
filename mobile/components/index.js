@@ -26,6 +26,11 @@ export {
     formatCnpjInput,
     extractCnpjDigits,
 } from './ClientFormCnpjField';
+export {
+    default as ClientFormCepField,
+    formatCepInput,
+    extractCepDigits,
+} from './ClientFormCepField';
 export { default as ClientFormStatusSelector } from './ClientFormStatusSelector';
 export { default as ClientFormPotentialSelector } from './ClientFormPotentialSelector';
 export { default as ClientFormScoreSelector } from './ClientFormScoreSelector';

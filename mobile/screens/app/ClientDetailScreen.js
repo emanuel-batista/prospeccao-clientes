@@ -341,23 +341,27 @@ export default function ClientDetailScreen({ navigation, route }) {
     const telefone = enrichedData?.telefone || null;
     const email = enrichedData?.email || null;
 
-    // Constrói string de endereço se disponível
+    // Constrói string de endereço priorizando dados salvos do cliente com fallback para BrasilAPI
     const fullAddress = useMemo(() => {
-        if (!enrichedData) return null;
+        const rua = client?.rua || enrichedData?.rua || '';
+        const numero = client?.numero || enrichedData?.numero || '';
+        const complemento = client?.complemento || enrichedData?.complemento || '';
+        const bairro = client?.bairro || enrichedData?.bairro || '';
+        const cidade = client?.cidade || enrichedData?.cidade || '';
+        const estado = client?.estado || enrichedData?.estado || '';
+        const cepRaw = client?.cep || enrichedData?.cep || '';
+        const cep = cepRaw ? (cepRaw.length === 8 ? cepRaw.replace(/^(\d{5})(\d{3})$/, '$1-$2') : cepRaw) : '';
+
         const parts = [
-            enrichedData.rua
-                ? `${enrichedData.rua}${enrichedData.numero ? `, ${enrichedData.numero}` : ''}`
-                : null,
-            enrichedData.complemento || null,
-            enrichedData.bairro || null,
-            enrichedData.cidade && enrichedData.estado
-                ? `${enrichedData.cidade} - ${enrichedData.estado}`
-                : enrichedData.cidade || enrichedData.estado || null,
-            enrichedData.cep ? `CEP ${enrichedData.cep}` : null,
+            rua ? `${rua}${numero ? `, ${numero}` : ''}` : null,
+            complemento || null,
+            bairro || null,
+            cidade && estado ? `${cidade} - ${estado}` : cidade || estado || null,
+            cep ? `CEP ${cep}` : null,
         ].filter(Boolean);
 
         return parts.length > 0 ? parts.join(', ') : null;
-    }, [enrichedData]);
+    }, [client, enrichedData]);
 
     const createdFormatted = formatDate(client?.createdAt);
     const updatedFormatted = formatDate(client?.updatedAt);
@@ -865,19 +869,41 @@ export default function ClientDetailScreen({ navigation, route }) {
                         ) : null}
                     </View>
                 ) : (
-                    <View style={styles.enrichedPlaceholder}>
-                        <MaterialIcons
-                            name="info-outline"
-                            size={18}
-                            color="#94A3B8"
-                            style={{ marginRight: 8 }}
-                        />
-                        <Text style={[styles.enrichedPlaceholderText, { fontFamily: fontRegular }]}>
-                            {loadingEnriched
-                                ? 'Consultando informações cadastrais via Receita Federal...'
-                                : 'Dados complementares da Receita não disponíveis para este CNPJ.'}
-                        </Text>
-                    </View>
+                    <>
+                        {fullAddress ? (
+                            <View style={[styles.dataGroup, { marginBottom: 12 }]}>
+                                <TouchableOpacity
+                                    style={styles.dataColumnRow}
+                                    onPress={() => handleOpenMap(fullAddress)}
+                                    activeOpacity={0.7}>
+                                    <View style={styles.dataLabelCol}>
+                                        <MaterialIcons name="place" size={16} color="#DC2626" style={styles.rowIcon} />
+                                        <Text style={[styles.dataLabel, { fontFamily: fontMedium }]}>
+                                            Endereço & Localização
+                                        </Text>
+                                        <MaterialIcons name="open-in-new" size={13} color="#080A96" style={{ marginLeft: 6 }} />
+                                    </View>
+                                    <Text style={[styles.dataValueMultiline, { fontFamily: fontRegular, color: '#1E293B' }]}>
+                                        {fullAddress}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : null}
+
+                        <View style={styles.enrichedPlaceholder}>
+                            <MaterialIcons
+                                name="info-outline"
+                                size={18}
+                                color="#94A3B8"
+                                style={{ marginRight: 8 }}
+                            />
+                            <Text style={[styles.enrichedPlaceholderText, { fontFamily: fontRegular }]}>
+                                {loadingEnriched
+                                    ? 'Consultando informações cadastrais via Receita Federal...'
+                                    : 'Dados complementares da Receita não disponíveis para este CNPJ.'}
+                            </Text>
+                        </View>
+                    </>
                 )}
 
                 <View style={styles.sectionDivider} />

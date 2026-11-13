@@ -72,6 +72,11 @@ export default function ClientFormCnpjField({
                     nomeFantasia: data.nomeFantasia || '',
                     cidade: data.cidade || '',
                     estado: data.estado || '',
+                    cep: data.cep || '',
+                    rua: data.rua || '',
+                    numero: data.numero || '',
+                    complemento: data.complemento || '',
+                    bairro: data.bairro || '',
                 });
                 setFeedback({
                     type: 'success',
